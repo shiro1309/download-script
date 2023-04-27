@@ -1,8 +1,10 @@
 import webbrowser as wb, pyautogui as pgi, json, os, time
 
+# this code is for mp4upload and a 1440p screen the download and dlownload click function need to be changed to fit yout screen, use the screen_where.py to find out
 
-#save the files and what they are going to be named
-#when download is finished then go over the names and change them
+
+# save the files and what they are going to be named
+# when download is finished then go over the names and change them
 
 class download:
     def page_close(self):                                                                               # gage close function
