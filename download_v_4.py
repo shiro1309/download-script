@@ -1,6 +1,12 @@
 import webbrowser as wb, pyautogui as pgi, json, os, time
 
-# this code is for mp4upload old and a 1440p screen the download and dlownload click function need to be changed to fit yout screen, use the screen_where.py to find out
+# this code is for mp4upload new (30sek waiting) and a 1440p screen the download and dlownload click function need to be changed to fit yout screen, use the screen_where.py to find out
+
+# changes in this verison
+# oppen a lot of tabs at once like 20 of them and then keep tabs on them by using a number that is reset every time and can be a maximum of the amount of tabs open
+# after every season of download, save it and then change the name insted of it being the last thing
+# use pygame to make a simple gui window
+
 
 class download:
     def page_close(self):
@@ -12,64 +18,36 @@ class download:
         pgi.keyUp("ctrl")
         
     def download_click(self):
-        pgi.moveTo(1278, 284)
+        pgi.moveTo(1680, 280)
         pgi.leftClick()
         time.sleep(3)
-        pgi.moveTo(1650, 847)
+        pgi.moveTo(1680, 670)
         pgi.leftClick()
 
-    def check_down_single(self):
-        files = os.listdir("downloads")
-
-        if any(".part" in s for s in files):
-            return True
-        else:
-            return False
-    
-    def check_down_advanced(self, download_list):
-        files = os.listdir("downloads")
-        
-        for file in files:
-            if any(".part" in file) and file not in download_list:
-                download_list.append(file)
-                return True, download_list
-            else:
-                return False, download_list
-
 class get_meta_data:
-    def get_series_name(self, series_data):
-        meta_data = []
-        for i in series_data['down']:
-            meta_data.append(i)
-        return(meta_data)
-    
-    def get_seasons(self, series_data, name_data):
-        season_data = []
-        for name in name_data:
-            n = 0
-            for season in series_data["down"][name]:
-                n += 1
-            season_data.append(n)
-        return season_data
-            
-    
-    def get_links(self, series_data):
+    def get_all_data(self, series_data):
         url_list = []
-        for i in series_data['down']:
-            for j in series_data['down'][i]:
-                for z in series_data['down'][i][j]:
+        episode_list = []
+        season_data = []
+        series_name = []
+        
+        for i in series_data["down"]:
+            series_name.append(i)
+            n = 0
+            
+            for j in series_data["down"][i]:
+                n += 1
+                n_ = 0
+                
+                for z in series_data["down"][i][j]:
+                    n_ += 1
                     url_list.append(series_data['down'][i][j][z])
-        return url_list
-    
-    def get_episode_count(self, series_data):
-        episode_data = []
-        for i in series_data['down']:
-            for j in series_data['down'][i]:
-                n = 0
-                for z in series_data['down'][i][j]:
-                    n += 1
-                episode_data.append(n)
-        return episode_data
+                    
+                episode_list.append(n_)
+                
+            season_data.append(n)
+            
+        return series_name, season_data, episode_list, url_list
     
 class file_name:
     def note_name(self, names, seasons, episodes, count, new_name_list):
@@ -92,22 +70,17 @@ class file_name:
                 names.append(filename)
         return names
     
+    
     def get_slice_index(self, number, slice_sizes):
         for i, size in enumerate(slice_sizes):
             if number <= size:
                 return i, number
             number -= size
             
+    # cant get it better than this
     def rename(self, old_name, new_name):
         for i in range(len(old_name)):
             os.rename(f"downloads/{old_name[i]}", f"downloads/{new_name[i]}")
-            
-    def backup(self, old_name, new_name):
-        file = open("backup.txt", "a")
-        file.truncate(0)
-        file.write(old_name + "\n")
-        file.write(new_name + "\n")
-        file.close()
 
 class App:
     def __init__(self):
@@ -117,20 +90,18 @@ class App:
         self.down = download()
         self.file_name = file_name()
 
-        self.series = self.meta.get_series_name(self.json_file)
-        self.seasons = self.meta.get_seasons(self.json_file, self.series)
-        self.episode_count = self.meta.get_episode_count(self.json_file)
-        self.link_data = self.meta.get_links(self.json_file)
+        self.series, self.seasons, self.episode_count, self.url_list= self.meta.get_all_data(self.json_file)
         self.new_file = False
         self.new_name_list = []
         self.old_name_list = []
         self.temp_array = []
         
+        
     def run(self):
         print(self.series, self.seasons, self.episode_count)
         print("it will take " + str(round(sum(self.episode_count)*220/60/60/5, 2)) + " hours with 5Mb/s")
-        print("it will be " + str(round(sum(self.episode_count)*220/1000, 2)) + " Gb of data")
-        n = 0
+        print("it will be " + str(round(sum(self.episode_count)*220/1000, 2)) + " Gb of data if the episode average is 220MB")
+        #n = 0
         while True:
             list_2 = self.link_data[n*10:(n+1)*10]
             list_3 = []
