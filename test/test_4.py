@@ -28,6 +28,5 @@ start_index = 0
 slice_index, index_within_slice = get_slice_index(number, slice_sizes, start_index)
 print(f"Slice index: {slice_index}, Index within slice: {index_within_slice}")
 
-print(f"{names[seas]} - S{season_index}E{episode_slice}")
 
 #Boku no Hero Academia - 09 (Dual Audio BD 1080p x264 FLAC) [54BA2DA2]
