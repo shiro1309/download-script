@@ -114,6 +114,17 @@ class file_name:
     def rename(self, old_name, new_name):
         for i in range(len(old_name)):
             os.rename(f"downloads/{old_name[i]}", f"downloads/{new_name[i]}")
+            
+    def check_new_file(self, no_new_file, old_name_list):
+        files = os.listdir("downloads")
+        for file in files:
+            if ".part" not in file:
+                if file not in old_name_list:
+                    old_name_list.append(file)
+                    no_new_file = False
+                else:
+                    no_new_file = True
+        return old_name_list, no_new_file 
 
 class App:
     def __init__(self):
@@ -124,7 +135,7 @@ class App:
         self.file_name = file_name()
 
         self.series, self.seasons, self.episode_count, self.url_list= self.meta.get_all_data(self.json_file)
-        self.new_file = False
+        self.no_new_file = False
         self.new_name_list = []
         self.old_name_list = []
         self.temp_array = []
@@ -138,19 +149,39 @@ class App:
         while True:
             list_2 = self.url_list[n*10:(n+1)*10]
             
-            self.down.downprep(list_2) # opens and prepere the pages for download just need to wait for 32 seconds
-            time.sleep(32) # the waiting time
+            file_list_new = 0
+            file_list_old = 0
+            
+            #self.down.downprep(list_2) # opens and prepere the pages for download just need to wait for 32 seconds
+            #time.sleep(32) # the waiting time
             for i in range(0, len(list_2)): # loops over links but as a number
-                self.down.page_down() # starts the download
-                time.sleep(1)
+                time.sleep(2)
                 
                 # check if its downloading
-                #files = os.listdir("downloads")
-                #for file in files:
-                #    if ".part" not in file:
-                        
+                
+                files = os.listdir("downloads")
+                for file in files:
+                    if ".part" not in file:
+                        if file not in self.old_name_list:
+                            self.old_name_list.append(file)
+                            file_list_new += 1
+                            self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*10+i+1, self.new_name_list)
+                
+                self.down.page_down() # starts the download
                 
                 
+                
+                print(file_list_new, file_list_old)
+                if file_list_new <= file_list_old:
+                    while self.no_new_file:
+                        files = os.listdir("downloads")
+                        for file in files:
+                            if ".part" not in file:
+                                if file not in self.old_name_list:
+                                    self.old_name_list.append(file)
+                                    file_list_new += 1
+                                    self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*10+i+1, self.new_name_list)
+                print(file_list_new, file_list_old)
                 self.down.gofront() # page shift
             
             files = os.listdir("downloads")
