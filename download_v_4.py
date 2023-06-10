@@ -22,7 +22,7 @@ class download:
         pgi.leftClick()
     
     def page_down(self):
-        time.sleep(3)
+        time.sleep(1)
         pgi.moveTo(1680, 670)
         pgi.leftClick()
         
@@ -146,49 +146,44 @@ class App:
         print("it will take " + str(round(sum(self.episode_count)*220/60/60/5, 2)) + " hours with 5Mb/s")
         print("it will be " + str(round(sum(self.episode_count)*220/1000, 2)) + " Gb of data if the episode average is 220MB")
         n = 0
+        episode = 0
+        batch_size = 10
         while True:
-            list_2 = self.url_list[n*10:(n+1)*10]
-            
-            file_list_new = 0
-            file_list_old = 0
-            
-            #self.down.downprep(list_2) # opens and prepere the pages for download just need to wait for 32 seconds
-            #time.sleep(32) # the waiting time
-            for i in range(0, len(list_2)): # loops over links but as a number
-                time.sleep(2)
-                
-                # check if its downloading
-                
-                files = os.listdir("downloads")
-                for file in files:
-                    if ".part" not in file:
-                        if file not in self.old_name_list:
-                            self.old_name_list.append(file)
-                            file_list_new += 1
-                            self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*10+i+1, self.new_name_list)
-                
-                self.down.page_down() # starts the download
-                
-                
-                
-                print(file_list_new, file_list_old)
-                if file_list_new <= file_list_old:
-                    while self.no_new_file:
-                        files = os.listdir("downloads")
-                        for file in files:
-                            if ".part" not in file:
-                                if file not in self.old_name_list:
-                                    self.old_name_list.append(file)
-                                    file_list_new += 1
-                                    self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*10+i+1, self.new_name_list)
-                print(file_list_new, file_list_old)
-                self.down.gofront() # page shift
-            
-            files = os.listdir("downloads")
-            for file in files:
-                if ".part" not in file:    
+            while True:
+                list_2 = self.url_list[n*batch_size:(n+1)*batch_size]
+
+                self.down.downprep(list_2) # opens and prepere the pages for download just need to wait for 32 seconds
+                time.sleep(32) # the waiting time
+                for i in range(len(list_2)): # loops over links but as a number
+                    episode += 1
+                    self.down.page_down() # starts the download
+                    time.sleep(1)
+
+                    self.down.page_close()
+                    files = os.listdir("downloads")
+                    for file in files:
+                        if ".part" not in file:
+                            if file not in self.old_name_list:
+                                self.old_name_list.append(file)
+                                self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*batch_size+i+1, self.new_name_list)
+                    
+                    print(episode, len(self.url_list))
+                while True:
+                    files = os.listdir("downloads")
+                    if any(".part" in s for s in files):
+                        pass
+                    else:
+                        break
+                n += 1
+                if episode >= len(self.url_list):
                     break
-            n += 1             
+            files = os.listdir("downloads")
+            if any(".part" in s for s in files):
+                pass
+            else:
+                break
+        
+        self.file_name.rename(self.old_name_list, self.new_name_list)          
             
         
 if __name__ == '__main__':
