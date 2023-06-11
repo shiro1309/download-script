@@ -147,6 +147,8 @@ class App:
         print("it will be " + str(round(sum(self.episode_count)*220/1000, 2)) + " Gb of data if the episode average is 220MB")
         n = 0
         episode = 0
+        
+        # 10 is a safe number at the moment
         batch_size = 10
         while True:
             while True:
@@ -167,7 +169,8 @@ class App:
                                 self.old_name_list.append(file)
                                 self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*batch_size+i+1, self.new_name_list)
                     
-                    print(episode, len(self.url_list))
+                    #print(episode, len(self.url_list))
+                    print(f"{episode/len(self.url_list)*100}% done")
                 while True:
                     files = os.listdir("downloads")
                     if any(".part" in s for s in files):
