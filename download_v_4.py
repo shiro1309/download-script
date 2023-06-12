@@ -169,8 +169,11 @@ class App:
                                 self.old_name_list.append(file)
                                 self.new_name_list = self.file_name.note_name(self.series, self.seasons, self.episode_count, n*batch_size+i+1, self.new_name_list)
                     
-                    #print(episode, len(self.url_list))
-                    print(f"{episode/len(self.url_list)*100}% done")
+                    x = round(episode/len(self.url_list)*100, 1)
+                    what_left = str(x).rjust(4) + "%"
+                    print(what_left, end='')
+                    print('\b' * len(what_left), end='', flush=False)
+                    
                 while True:
                     files = os.listdir("downloads")
                     if any(".part" in s for s in files):
@@ -188,7 +191,6 @@ class App:
         
         self.file_name.rename(self.old_name_list, self.new_name_list)          
             
-        
 if __name__ == '__main__':
     app = App()
     app.run()
