@@ -189,7 +189,8 @@ class App:
             else:
                 break
         
-        self.file_name.rename(self.old_name_list, self.new_name_list)          
+        self.file_name.rename(self.old_name_list, self.new_name_list)
+        print(f"there was {len(self.url_list) - len(self.old_name_list)} files that was not downloaded")
             
 if __name__ == '__main__':
     app = App()
